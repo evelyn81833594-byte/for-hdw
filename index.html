@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#070b18">
+<title>她的两年 · 星海展厅</title>
+<style>
+:root{
+  --bg:#070b18;
+  --bg2:#0d1730;
+  --ink:#e9eefc;
+  --dim:#93a2c4;
+  --gold:#f2c17a;
+  --gold2:#ffdca6;
+  --paper:#f7f2e7;
+  --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC","SimSun",serif;
+  --kai:"Kaiti SC","STKaiti","KaiTi","Xingkai SC",serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden}
+body{-webkit-font-smoothing:antialiased}
+img{max-width:100%}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+.layer{position:relative;z-index:2}
+
+/* ── 固定 UI ───────────────────────────── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  display:flex;justify-content:space-between;align-items:center;
+  pointer-events:none;
+}
+#progress{
+  font-size:12px;letter-spacing:.12em;color:var(--dim);
+  background:rgba(7,11,24,.5);backdrop-filter:blur(6px);
+  border:1px solid rgba(242,193,122,.22);border-radius:20px;
+  padding:5px 12px;opacity:0;transition:opacity .8s;
+}
+#progress.show{opacity:1}
+#progress b{color:var(--gold);font-weight:600}
+#musicBtn{
+  position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);
+  z-index:60;width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(242,193,122,.35);background:rgba(7,11,24,.6);
+  backdrop-filter:blur(6px);color:var(--gold);font-size:17px;
+  display:none;align-items:center;justify-content:center;
+  transition:transform .3s,opacity .3s;
+}
+#musicBtn.show{display:flex}
+#musicBtn.playing{animation:spin 8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#musicBtn.paused{opacity:.45}
+
+/* ── 封面 ─────────────────────────────── */
+#gate{
+  min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px 28px;position:relative;
+}
+#gate .lamp{font-size:26px;color:var(--gold);opacity:.8;margin-bottom:26px;animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.4;transform:scale(.94)}50%{opacity:.95;transform:scale(1.06)}}
+#gate h1{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(26px,7.2vw,38px);letter-spacing:.16em;
+  margin:0 0 18px;line-height:1.6;
+}
+#gate .sub{font-family:var(--kai);font-size:15px;color:var(--dim);letter-spacing:.2em;margin-bottom:8px}
+#gate .tip{margin-top:34px;font-size:12.5px;color:#6b799c;letter-spacing:.16em;line-height:2}
+#enter{
+  margin-top:26px;width:88px;height:88px;border-radius:50%;
+  border:1px solid rgba(242,193,122,.55);background:transparent;
+  color:var(--gold);font-family:var(--kai);font-size:16px;letter-spacing:.2em;
+  position:relative;cursor:pointer;
+}
+#enter::after{
+  content:"";position:absolute;inset:-1px;border-radius:50%;
+  border:1px solid rgba(242,193,122,.5);animation:ripple 2.6s ease-out infinite;
+}
+@keyframes ripple{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+#enter span{display:block}
+#enter small{display:block;font-size:10px;letter-spacing:.1em;color:var(--dim);margin-top:4px;font-family:var(--sans)}
+
+/* ── 通用段落 ─────────────────────────── */
+.wrap{max-width:660px;margin:0 auto;padding:0 26px}
+.eyebrow{font-family:var(--kai);font-size:12.5px;letter-spacing:.3em;color:var(--gold);opacity:.85}
+h2.lit{font-family:var(--serif);font-weight:400;font-size:clamp(20px,5.4vw,26px);letter-spacing:.08em;line-height:1.8;margin:14px 0 20px}
+p.story{font-family:var(--serif);font-size:16.5px;line-height:2.15;color:#d5deF2;letter-spacing:.04em;margin:0 0 18px;text-align:justify}
+
+/* ── 序章 ─────────────────────────────── */
+#prologue{padding:96px 0 40px;opacity:0;transform:translateY(24px);transition:opacity 1.4s,transform 1.4s}
+#prologue.in{opacity:1;transform:none}
+#prologue .frame{
+  margin:40px 0 10px;position:relative;
+  display:flex;justify-content:center;
+}
+
+/* ── 展厅 ─────────────────────────────── */
+#hall{max-width:680px;margin:0 auto;padding:60px 26px 40px;position:relative}
+#hall::before{
+  content:"";position:absolute;left:38px;top:80px;bottom:80px;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(242,193,122,.28) 8%,rgba(242,193,122,.28) 92%,transparent);
+}
+.exhibit{position:relative;padding-left:40px;margin-bottom:104px;opacity:0;transform:translateY(30px);transition:opacity 1.1s ease,transform 1.1s ease}
+.exhibit.in{opacity:1;transform:none}
+.exhibit .dot{
+  position:absolute;left:-6px;top:9px;width:11px;height:11px;border-radius:50%;
+  background:#2a3552;border:1px solid rgba(242,193,122,.35);
+  transition:background .9s,box-shadow .9s,border-color .9s;
+}
+.exhibit.in .dot{background:var(--gold);border-color:var(--gold2);box-shadow:0 0 0 4px rgba(242,193,122,.13),0 0 16px 3px rgba(242,193,122,.55)}
+.exhibit .date{font-family:var(--kai);font-size:13px;letter-spacing:.22em;color:var(--gold);opacity:.9;margin-bottom:12px}
+.exhibit h3{font-family:var(--serif);font-weight:400;font-size:20px;letter-spacing:.06em;margin:26px 0 14px;line-height:1.7}
+.exhibit .story{font-size:16px;line-height:2.1}
+
+/* 拍立得 */
+.polaroid{
+  position:relative;width:min(100%,300px);
+  background:var(--paper);padding:11px 11px 0;border-radius:2px;
+  box-shadow:0 20px 44px rgba(0,0,0,.55),0 2px 0 rgba(255,255,255,.5) inset;
+  transform:rotate(var(--r,0deg));transition:transform .9s cubic-bezier(.2,.8,.2,1);
+}
+.exhibit.in .polaroid{transform:rotate(var(--r2,0deg))}
+.tape{
+  position:absolute;top:-11px;left:50%;width:82px;height:23px;
+  background:linear-gradient(180deg,rgba(242,193,122,.62),rgba(242,193,122,.4));
+  border-left:1px dashed rgba(255,255,255,.35);border-right:1px dashed rgba(255,255,255,.35);
+  transform:translateX(-50%) rotate(-3deg);
+}
+.photo{
+  width:100%;aspect-ratio:4/3;display:block;object-fit:cover;object-position:center 42%;background:#1b2237;
+  filter:grayscale(1) blur(7px) brightness(.62) contrast(1.1);opacity:.35;
+  transition:filter 1.5s ease,opacity 1.5s ease;
+}
+.exhibit.in .photo{filter:none;opacity:1}
+.pstack{position:relative;width:100%;aspect-ratio:4/3;background:#1b2237;overflow:hidden}
+.pstack .photo{
+  position:absolute;object-fit:cover;object-position:center 42%;
+  aspect-ratio:4/3;height:88%;width:auto;
+  filter:grayscale(1) blur(7px) brightness(.62) contrast(1.1) !important;opacity:.35;
+  transition:filter 1.5s ease,opacity 1.5s ease;
+}
+/* 像一叠照片摊在桌上：错开、微微歪斜、白边 */
+.pstack .photo.s0{left:1%;top:2%;transform:rotate(-3deg)}
+.pstack .photo.s1{left:15%;top:11%;transform:rotate(2.6deg);border:3px solid #fdfaf2;
+  box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.pstack .photo.s2{left:8%;top:22%;transform:rotate(-1.8deg);border:3px solid #fdfaf2;
+  box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.exhibit.in .pstack .photo{filter:none !important;opacity:1 !important}
+.photo-ph{
+  width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:6px;
+  background:linear-gradient(150deg,#1a2338,#0e1628 60%,#18213a);
+  color:#5d6c92;font-family:var(--kai);font-size:13px;letter-spacing:.18em;
+}
+.photo-ph em{font-style:normal;font-size:10.5px;color:#41506f;letter-spacing:.1em}
+.polaroid .cap{
+  font-family:var(--kai);font-size:13px;color:#8a7250;text-align:center;
+  padding:12px 6px 13px;letter-spacing:.06em;
+}
+
+/* ── 星海 ─────────────────────────────── */
+#starsea{
+  position:relative;height:100vh;height:100dvh;width:100%;
+  overflow:hidden;
+}
+#sc{position:absolute;inset:0;width:100%;height:100%}
+#seahint{
+  position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 96px);
+  text-align:center;font-family:var(--kai);font-size:13px;letter-spacing:.2em;
+  color:var(--dim);transition:opacity .8s;padding:0 24px;line-height:2;
+}
+#seatitle{
+  position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 74px);
+  text-align:center;font-family:var(--kai);font-size:12.5px;letter-spacing:.5em;
+  color:var(--gold);opacity:.55;pointer-events:none;
+}
+#linkBtn{
+  position:absolute;left:50%;transform:translateX(-50%);
+  bottom:calc(env(safe-area-inset-bottom) + 34px);
+  padding:13px 30px;border-radius:30px;
+  border:1px solid rgba(242,193,122,.5);background:rgba(242,193,122,.07);
+  color:var(--gold);font-family:var(--kai);font-size:15px;letter-spacing:.22em;
+  backdrop-filter:blur(4px);cursor:pointer;opacity:0;pointer-events:none;
+  transition:opacity .9s,transform .4s;
+}
+#linkBtn.show{opacity:1;pointer-events:auto}
+#linkBtn:active{transform:translateX(-50%) scale(.96)}
+#linkBtn.done{opacity:0;pointer-events:none}
+
+/* 星点卡片 */
+#card{
+  position:fixed;inset:0;z-index:70;display:none;
+  align-items:center;justify-content:center;padding:28px;
+  background:rgba(5,8,17,.72);backdrop-filter:blur(8px);
+}
+#card.show{display:flex;animation:fadeIn .45s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#card .inner{
+  max-width:400px;width:100%;max-height:78dvh;overflow-y:auto;
+  background:linear-gradient(170deg,rgba(20,28,52,.96),rgba(11,17,34,.96));
+  border:1px solid rgba(242,193,122,.3);border-radius:14px;padding:26px 24px 24px;
+  box-shadow:0 30px 70px rgba(0,0,0,.6);
+}
+#card .cd{font-family:var(--kai);font-size:12.5px;letter-spacing:.22em;color:var(--gold);margin-bottom:10px}
+#card h4{font-family:var(--serif);font-weight:400;font-size:19px;letter-spacing:.06em;margin:0 0 14px;line-height:1.7}
+#card .ct{font-family:var(--serif);font-size:15.5px;line-height:2.05;color:#cfd9f0;margin-bottom:20px;text-align:justify}
+#card .cph{
+  width:100%;aspect-ratio:4/3;border-radius:4px;object-fit:cover;object-position:center 42%;background:#1b2237;
+  margin-bottom:16px;display:block;
+}
+#card .close{
+  display:block;width:100%;padding:11px;border:1px solid rgba(242,193,122,.32);
+  border-radius:24px;background:transparent;color:var(--dim);
+  font-family:var(--kai);font-size:14px;letter-spacing:.2em;cursor:pointer;
+}
+
+/* ── NASA 背景星空：极淡地铺在底色上，随滚动换图 ── */
+.bglayer{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  overflow:hidden;
+}
+.bglayer .bgi{
+  position:absolute;inset:-6%;
+  width:112%;height:112%;object-fit:cover;object-position:center 45%;
+  opacity:0;transform:scale(1.06);
+  filter:saturate(.85) brightness(.85) contrast(1.05);
+  mix-blend-mode:screen;
+  transition:opacity 2.4s ease,transform 12s ease;
+}
+.bglayer .bgi.on{opacity:.20;transform:scale(1)}
+/* 底部压暗，保证文字始终清楚 */
+.bglayer::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 38%,rgba(7,11,24,.28) 0%,rgba(7,11,24,.72) 62%,rgba(7,11,24,.92) 100%);
+}
+
+/* ── 网易云音乐卡片 ─────────────────────── */
+.mcard{
+  margin:26px auto 0;max-width:330px;width:88%;
+  display:flex;align-items:center;gap:14px;
+  padding:13px 15px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+  border:1px solid rgba(242,193,122,.26);
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  text-align:left;cursor:pointer;
+  transition:transform .25s ease,border-color .25s ease;
+}
+.mcard:active{transform:scale(.97)}
+.mcard .disc{
+  flex:0 0 46px;height:46px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#3c4761,#2a3348 60%,#161d2e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;color:var(--gold);
+  box-shadow:0 4px 12px rgba(0,0,0,.4);
+  position:relative;
+}
+.mcard .disc.cov{overflow:hidden;background:#1a2136}
+.mcard .disc.cov img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.mcard .disc.cov::after{display:none}
+.mcard .disc::after{
+  content:"";position:absolute;width:13px;height:13px;border-radius:50%;
+  background:#0f1524;box-shadow:inset 0 0 0 1px rgba(242,193,122,.35);
+}
+.mcard.on .disc{animation:spin 4s linear infinite}
+.mcard .meta{flex:1;min-width:0}
+.mcard .mt{font-family:var(--kai);font-size:14.5px;letter-spacing:.08em;color:#e8eefc;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcard .ma{font-size:11.5px;color:#8b9ac0;letter-spacing:.1em;margin-top:3px}
+.mcard .mb{
+  flex:0 0 auto;font-size:11.5px;letter-spacing:.1em;color:var(--gold);
+  padding:6px 11px;border-radius:14px;border:1px solid rgba(242,193,122,.35);
+  white-space:nowrap;
+}
+.mhint{margin:10px auto 0;font-size:11px;color:#5b6a8d;letter-spacing:.12em;line-height:1.8}
+
+/* ── 尾声 ─────────────────────────────── */
+#finale{padding:110px 0 130px;text-align:center;opacity:0;transform:translateY(20px);transition:opacity 1.6s,transform 1.6s}
+#finale.in{opacity:1;transform:none}
+#finale .big{font-family:var(--serif);font-size:clamp(21px,6vw,28px);letter-spacing:.1em;line-height:2;margin:18px 0 26px}
+#finale .sig{font-family:var(--kai);font-size:14px;color:var(--dim);letter-spacing:.16em;margin-top:40px;line-height:2.2}
+.note{
+  margin-top:52px;border:1px dashed rgba(242,193,122,.32);border-radius:12px;
+  padding:22px 20px;background:rgba(242,193,122,.04);text-align:left;
+}
+.note .nl{font-family:var(--kai);font-size:12.5px;letter-spacing:.22em;color:var(--gold);margin-bottom:12px}
+.note textarea{
+  width:100%;min-height:96px;background:transparent;border:none;resize:none;outline:none;
+  color:#dfe6f7;font-family:var(--serif);font-size:15px;line-height:1.95;letter-spacing:.03em;
+}
+.note textarea::placeholder{color:#5b6a8d}
+.note .acts{display:flex;gap:10px;margin-top:12px;justify-content:flex-end}
+.note button{
+  padding:8px 18px;border-radius:20px;border:1px solid rgba(242,193,122,.35);
+  background:transparent;color:var(--gold);font-family:var(--kai);font-size:13px;
+  letter-spacing:.14em;cursor:pointer;
+}
+.note .saved{margin-top:10px;font-size:12px;color:#6f7ea3;letter-spacing:.1em;min-height:16px}
+#voiceBtn{
+  display:none;margin:34px auto 0;padding:12px 26px;border-radius:26px;
+  border:1px solid rgba(242,193,122,.4);background:rgba(242,193,122,.06);
+  color:var(--gold);font-family:var(--kai);font-size:14.5px;letter-spacing:.18em;cursor:pointer;
+}
+/* ── 信件 ─────────────────────────────── */
+.letter{
+  position:relative;max-width:520px;margin:40px auto 0;
+  background:
+    repeating-linear-gradient(to bottom,transparent,transparent 34px,rgba(120,100,70,.10) 34px,rgba(120,100,70,.10) 35px),
+    linear-gradient(168deg,#faf6ec 0%,#f4eee1 60%,#efe7d8 100%);
+  color:#3d342a;border-radius:2px;padding:40px 26px 32px;
+  box-shadow:0 26px 64px rgba(0,0,0,.55),0 2px 0 rgba(255,255,255,.6) inset;
+  font-family:var(--kai);font-size:15.5px;line-height:2.05;letter-spacing:.03em;
+  text-align:left;
+}
+.letter .lt{
+  font-family:var(--serif);font-size:19px;letter-spacing:.14em;
+  color:#7a4a1e;margin-bottom:22px;padding-bottom:14px;
+  border-bottom:1px dashed rgba(120,100,70,.35);
+}
+.letter p{margin:0 0 16px}
+.letter .hl{
+  font-style:normal;color:#a0631f;border-bottom:1px solid rgba(160,99,31,.35);
+  padding-bottom:1px;
+}
+.letter .names{
+  margin:22px 0;padding:16px 0;
+  border-top:1px dashed rgba(120,100,70,.28);
+  border-bottom:1px dashed rgba(120,100,70,.28);
+}
+.letter .namesEnd{margin:0 0 8px;color:#5a4a35}
+.letter .nm{font-style:normal;font-weight:600;color:#7a4a1e}
+.letter .qs{margin:26px 0 8px}
+.letter .q{
+  opacity:0;transform:translateY(14px);
+  transition:opacity 1s ease,transform 1s ease;
+  margin:0 0 13px;color:#5a4a35;
+}
+.letter .q.in{opacity:1;transform:none}
+.letter .q::before{content:"";display:inline-block;width:14px;height:1px;
+  background:rgba(120,100,70,.5);vertical-align:middle;margin-right:9px}
+.letter .unknown{margin-top:22px;color:#3d342a}
+.letter .why{
+  margin-top:30px;text-align:center;font-size:16px;color:#8a5a2b;letter-spacing:.1em;
+}
+.letter .answer{
+  margin:12px 0 0;text-align:center;font-family:var(--serif);
+  font-size:clamp(17px,4.6vw,21px);line-height:1.9;color:#7a4a1e;letter-spacing:.06em;
+  opacity:0;transform:translateY(14px);transition:opacity 1.2s ease,transform 1.2s ease;
+}
+.letter .answer.in{opacity:1;transform:none}
+.letter .lemb{
+  margin:30px auto 6px;max-width:260px;text-align:center;
+}
+.letter .lemb img{
+  width:100%;border-radius:3px;display:block;
+  box-shadow:0 10px 26px rgba(0,0,0,.22);
+  transform:rotate(-1.4deg);
+}
+.letter .lemb figcaption{
+  margin-top:9px;font-size:12px;color:#8a7860;letter-spacing:.14em;
+}
+.letter .sign{
+  margin-top:28px;text-align:right;font-size:13.5px;color:#8a7860;letter-spacing:.08em;
+}
+.letter .tape{
+  background:linear-gradient(180deg,rgba(180,150,90,.45),rgba(180,150,90,.28));
+  border-left:1px dashed rgba(255,255,255,.4);border-right:1px dashed rgba(255,255,255,.4);
+}
+.credit{margin-top:60px;font-size:11.5px;color:#4e5c7d;letter-spacing:.14em;line-height:2}
+.keep{margin-top:46px;padding-top:32px;border-top:1px solid rgba(242,193,122,.16)}
+.keep .kl{font-family:var(--kai);font-size:12.5px;letter-spacing:.2em;color:#7c8bab;margin-bottom:16px}
+#keepBtn{
+  padding:12px 26px;border-radius:26px;
+  border:1px dashed rgba(242,193,122,.45);background:transparent;
+  color:var(--gold);font-family:var(--kai);font-size:14.5px;letter-spacing:.18em;cursor:pointer;
+}
+#keepBtn:active{transform:scale(.96)}
+#keepBtn:disabled{opacity:.5}
+.keep .kt{margin-top:14px;font-size:11.5px;color:#5b6a8d;letter-spacing:.1em;line-height:1.9;min-height:18px}
+</style>
+</head>
+<body>
+
+<canvas id="sky"></canvas>
+
+<audio id="bgm" loop preload="auto" playsinline></audio>
+<audio id="voice" preload="none" playsinline></audio>
+
+<div id="topbar"><div id="progress">已点亮 <b id="pCount">0</b> / <span id="pTotal">8</span></div><div></div></div>
+<div id="musicBtn">♪</div>
+
+<!-- ═══ 封面 ═══ -->
+<div id="bgPhoto" class="bglayer"></div>
+<section id="gate" class="layer">
+  <div class="lamp">✦</div>
+  <h1 id="gTitle">致 小满 的两年</h1>
+  <div class="sub" id="gSub">2024 · 春 —— 2026 · 秋</div>
+  <button id="enter"><span>推 门</span><small id="enterSub">建议戴上耳机</small></button>
+  <div id="mCard"></div>
+  <div class="tip">门后是一条走廊<br>走廊尽头是一片海</div>
+</section>
+
+<!-- ═══ 序章 ═══ -->
+<section id="prologue" class="layer">
+  <div class="wrap">
+    <div class="eyebrow">序 · 两年前的她</div>
+    <h2 class="lit" id="proTitle">那时候她还不知道，接下来这两年会发生什么。</h2>
+    <div id="proText"></div>
+    <div class="frame" id="proFrame"></div>
+  </div>
+</section>
+
+<!-- ═══ 展厅 ═══ -->
+<section id="hall" class="layer"></section>
+
+<!-- ═══ 星海 ═══ -->
+<section id="starsea" class="layer">
+  <canvas id="sc"></canvas>
+  <div id="seatitle">星 海</div>
+  <div id="seahint">那些被点亮的时刻，都浮在这里了<br>点一点，可以再看一遍</div>
+  <button id="linkBtn">把它们连起来</button>
+</section>
+
+<!-- ═══ 尾声 ═══ -->
+<section id="finale" class="layer">
+  <div class="wrap">
+    <div class="eyebrow">终 · 现在的她</div>
+    <div class="big" id="finBig">谢谢你，成为了现在的自己。</div>
+    <div id="finText"></div>
+    <div id="finLetter"></div>
+    <button id="voiceBtn">▶ 听我说两句</button>
+    <div class="note">
+      <div class="nl">写给两年后的自己</div>
+      <textarea id="wish" placeholder="这里只有你看得到。写完之后点右边保存，下次再打开这个页面，它还在。"></textarea>
+      <div class="acts"><button id="saveWish">保 存</button></div>
+      <div class="saved" id="savedTip"></div>
+    </div>
+    <div class="sig" id="finSig">—— 来自一个一直在看着你长大的人</div>
+    <div class="credit" id="credit"></div>
+    <div class="keep">
+      <div class="kl">如果哪天这个链接打不开了</div>
+      <button id="keepBtn">把这一页存进手机</button>
+      <div class="kt" id="keepTip">会存成一个网页文件，不联网也能打开。 </div>
+    </div>
+  </div>
+</section>
+
+<!-- 星点卡片 -->
+<div id="card"><div class="inner">
+  <div class="cd" id="cardDate"></div>
+  <h4 id="cardTitle"></h4>
+  <img class="cph" id="cardPhoto" alt="">
+  <div class="ct" id="cardText"></div>
+  <button class="close" id="cardClose">合 上</button>
+</div></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ★★★  你要改的东西，全都在这一个 CONFIG 里  ★★★
+   往下翻还有 EMBEDDED_MUSIC（音乐文件）这一项，也在下面不远。
+   ═══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  // ── 她 ──
+  friendName: "侯丁文",                 // 她的名字（封面标题 & 结尾星座都会用）
+  constellation: "侯丁文",              // 备用：文字点阵模式时用
+  constellationShape: "libra",       // 星座造型："libra"=天秤座天平   或 "text"=把上面那几个字连成点阵
+  subtitle: "2024 - 2026",
+
+  // ── 音乐 ──
+  // 方式A（推荐）：把 mp3 放进 assets/ 文件夹，这里写 "assets/lonely-god.mp3"
+  // 方式B：运行 python3 embed_music.py 把音乐直接焊进这个网页，这里写 "embedded"
+  // 暂时没有音乐：写 ""，页面照常工作，只是没有声音
+  musicSrc: "",                       // 有本地 mp3 就填 "assets/xxx.mp3"；没有就留空，用下面的网易云卡片
+  // ── 网易云音乐卡片（没有本地音频时用这个）─────────
+  music: {
+    title: "Lonely God",
+    artist: "惘闻",
+    album: "0.7",
+    // 网易云歌曲 id。打开网易云 → 找到这首歌 → 分享 → 复制链接，
+    // 链接里 ?id= 后面那串数字就是。例：https://music.163.com/song?id=123456
+    songId: "385322",
+    webUrl: "",                       // 也可以直接填完整链接，留空则自动用 songId 拼
+    tip: "推门前，先让它响起来。",
+    cover: "assets/netease-cover.jpg"   // 卡片左边的封面图，留空则显示唱片图标
+  },
+  // ── 背景星空（NASA 天文图，会极淡地铺在夜空底色上）─────
+  bgPhotos: {
+    gate: "assets/nasa-galaxy.jpg",      // 推门页：那个侧向的星系
+    finale: "assets/nasa-cluster.jpg"    // 尾声/星座：那片星团与星云
+  },
+  bgCredit: "背景星空来自 NASA · 10 月 22 日，她来到那天宇宙的样子",
+  musicCredit: "惘闻《Lonely God》",
+  voiceSrc: "",                       // 你的语音彩蛋，例如 "assets/voice.m4a"，没有就留空
+
+  // ── 序章 ──
+  prologue: {
+    title: "学生时代的她，我不在场",
+    text: [
+      "学生时代的她，我没见过。后来听说的版本是：成绩很好，要强，什么都要做到最好，有一股不服输的劲。",
+      "所以 2024 年 7 月，她从学校直接走进职场的时候，带去的不只是一张毕业证，还有那股劲。",
+      "后来的两年里，那股劲既让她撑了下来，也让她难受\u2014\u2014因为职场不像考试，不是你做好了，事情就会好。",
+      "但我想把这些写下来，是因为那股劲从来没有消失过。它只是从「我要拿第一」，慢慢变成了「我再坚持一下」。",
+      "而后者，比前者难多了。"
+    ],
+    photo: "assets/manchester.jpg",   // 曼彻斯特大学，她读书的地方
+    photoCaption: "她读书的地方",
+    noPhoto: ["学生时代的她", "我没见过"]   // 没照片时，相框里显示这两行字
+  },
+
+  // ── 八个展品 ──
+  // date：日期 / 标签    title：标题    text：故事（数组，每一项是一段）
+  // photo：照片路径，留空就是占位框    caption：拍立得下方那行小字
+  // 想加/减展品，直接复制或删掉一整块 { } 就行，数量会自动适配
+  exhibits: [
+    {
+      date: "2024 · 07",
+      title: "第一次被人叫「侯工」",
+      text: [
+        "七月，没有缓冲，学生证换成了工牌。",
+        "然后是某个很普通的上午，有人隔着工位喊了一声「侯工」。她愣了一下，才反应过来是在叫自己。",
+        "在此之前，落在她身上的称呼一直是名字、绰号、学号。\u201c工\u201d这个字是第一次\u2014\u2014它比入职通知、比工牌、比任何一份文件都更像一份通知。说的是：你现在是个能扛事的人了。",
+        "这是学生变成大人的第一课，没有教材，也没有人提前通知。",
+        "猝不及防。"
+      ],
+      photo: ["assets/cake.jpg"],
+      caption: "侯工，请多指教"
+    },
+    {
+      date: "2024 · 12",
+      title: "答辩结束那天，我们第一次一起吃饭",
+      text: [
+        "十二月是个很挤的月份：她刚结束一场很重要的答辩，我刚入职。两件事撞在了一起。",
+        "答辩结束那天，我们去了附近的一家店。那时候还不熟，两个 i 人坐在对面，点菜都要斟酌半天，话也是一句一句往外挤的。但现在回头看，就是那顿饭开始的。慢，但一直在走。",
+        "也是那个月，我们加上了微信。然后我整整 25 天没有回过消息。",
+        "这件事后来被念叨了很多次。念叨的方式有很多种，但中心思想一直是同一个：\u201c你这个人，一开始可真冷淡。\u201d",
+        "我没怎么解释过。有些事就是这样\u2014\u2014后来我们熟到可以把这 25 天当成笑话讲，它就已经不是冷淡了，是我们之间第一个能被反复提起的梗。",
+        "25 天，换来一个能念叨很多年的开头，挺划算的。"
+      ],
+      photo: ["assets/pigeon.jpg"],
+      caption: "那家店，那天的菜"
+    },
+    {
+      date: "2025 · 03",
+      title: "深圳和惠州之间",
+      text: [
+        "三月，她开始接触项目管理，同时也开始了深圳和惠州之间的通勤。早起，晚归，一天里有很长一段时间在路上。",
+        "新的角色，新的路，新的作息，一切都是陌生的。她没抱怨过，只是每天照常出门。",
+        "我记得她坐在公司班车上的样子\u2014\u2014起得太早，回得太晚，靠着窗放空，什么都不想。",
+        "也记得她晚上回到家，还在查专业术语的翻译，一个词一个词地抠。那时候她刚接手，很多东西都是第一次见。",
+        "还有不配合的同事，难缠的客户。这些她不太跟我说，但我看得出来。",
+        "她的心态并不是一直都好。但她是那种，崩溃完了还能给自己打气的人\u2014\u2014第二天照常出门。",
+        "生活很普通，也很难。她就是那样一天一天坚持过来的。"
+      ],
+      photo: ["assets/chat.jpg"],
+      caption: "很长的一段路"
+    },
+    {
+      date: "2025 · 06 · 端午",
+      title: "她在烟台，我在雨崩",
+      text: [
+        "端午，她在烟台，我在雨崩。",
+        "她在葫芦岛音乐节\u2014\u2014海风、人群、音乐，玩得很开心。我在雨崩村翻山，一整天都在走路。",
+        "隔着几千公里，谁也不知道对方那天具体在干什么。",
+        "但我们都做了同一件事：给自己放了个假。",
+        "那阵子都很累。累到需要各自逃开一下，才回得来继续。"
+      ],
+      photo: ["assets/yantai.jpg"],
+      caption: "各自逃开一下"
+    },
+    {
+      date: "2025 · 06 · 29",
+      title: "凌晨四点半，说走就走去看日出",
+      text: [
+        "那天她加班到很晚。忙完已经是深夜，谁都不太想睡，就有人突然说了一句：要不去看日出吧。",
+        "然后真的就去了。凌晨四点半打车到深圳湾，天是一点点亮起来的。",
+        "看完日出，在附近找了家店，吃了热乎的粥和各种早餐。具体吃了什么我记不清了，只记得是热的\u2014\u2014两个人都困得说不出话，又都很高兴。",
+        "那阵子还有很多小事。很累，但在平湖那个 30 平米的小房间里，有朋友，有晚餐，有一只待了不太久的小猫，有入职一周年的蛋糕。",
+        "日子是苦的，但也是真的在过。苦中作乐这件事，她一向很擅长。"
+      ],
+      photo: ["assets/sunrise.jpg"],
+      caption: "凌晨四点半的深圳湾"
+    },
+    {
+      date: "2025 · 07",
+      title: "决定搬家的那天，她长舒了一口气",
+      text: [
+        "搬去惠州这件事，她犹豫了很久。",
+        "做决定的时候是带着痛的\u2014\u2014有点像逼自己一把。但定下来的那一刻，也是真的长舒了一口气。",
+        "然后是兵荒马乱的半个月：一边咬牙坚持工作，一边收拾、打包、看房、搬家。几件事同时压着，她一件也没落下。",
+        "七月，她从深圳平湖搬到惠州仲恺。房子变大了，通勤没有了\u2014\u2014那趟每天早起晚归的路，终于不用再走了。",
+        "惠州很偏。刚来的时候，连去哪买菜都不知道。然后是很长一段时间的\u201c相依为命\u201d。陌生的地方，陌生的一切，只有两个人。",
+        "好多事都是这样过来的：\u201c再克服一下\u201d，\u201c再坚持一下\u201d。",
+        "她被一只将近巴掌大的小强吓哭过。是真的哭了。后来又一次次把心态重建起来。再后来她跟我说，自己真棒\u2014\u2014敢自己用开水处理了。",
+        "这句话听着有点心酸，也有点无奈。但真的很厉害。",
+        "一个人把\u201c我不敢\u201d变成\u201c我自己来\u201d，中间隔着的不是勇气两个字，是很多个吓哭又爬起来的晚上。",
+        "我们其实没能探索惠州多少小店。但去过的地方依然算数。"
+      ],
+      photo: ["assets/desk.jpg", "assets/car.jpg"],
+      caption: "仲恺，七月"
+    },
+    {
+      date: "2025 · 10 · 18",
+      title: "那天海很蓝，风很大",
+      text: [
+        "十月，我们去了汕尾。一个离惠州很近的海边小镇\u2014\u2014近到像是生活随手留的一个出口。",
+        "中午在二马路，钻进巷子深处吃牛肉火锅。不是什么榜上有名的店，是那种只有本地人才找得到的。锅开了，雾气爬满玻璃，窗外的东西就都模糊了。",
+        "吃完坐公交去海边。不是打车，是公交\u2014\u2014慢，晃，站牌一个一个往后退。时间在那辆车上，是真的慢下来了。",
+        "下午骑着电动车沿着海岸走。风把两个人吹成两只傻狗，头发乱得不成样子，谁也顾不上谁。",
+        "那天的海很蓝，风很大。大到说话要靠喊，大到很多话就算喊出来，也会散在风里。",
+        "所以那天其实没聊什么。但我一直记得那片蓝。"
+      ],
+      photo: ["assets/shanwei.jpg"],
+      caption: "汕尾，十月，很大的风"
+    },
+    {
+      date: "2026 · 01",
+      title: "在西施音乐节，我第一次看见她眼睛里的光",
+      text: [
+        "跨年，我们一起去了西施音乐节。",
+        "在人群里，在那些她热爱的摇滚里，我第一次意识到——她的眼睛是有光的。",
+        "不是比喻。是真的，亮着的那种。",
+        "那两年里我见过她很多样子：崩溃的、硬撑的、吓哭的、笑得很大声的。但那天那个样子，是别的任何时候都没有的。",
+        "我才知道，原来她心里一直有这样一个地方，是吵的、热的、亮的，谁也拿不走。"
+      ],
+      photo: ["assets/xishi1.jpg", "assets/xishi2.jpg"],
+      caption: "眼睛里有光"
+    },
+    {
+      date: "2026 · 春",
+      title: "一辆小车，载着我俩",
+      text: [
+        "惠州也会开花。",
+        "清明前后，我们溜达去了广州，在小巷子里吃了很好吃的卷卷薯条。",
+        "那阵子，特斯拉女车主的技术突飞猛进。一辆小车，载着我俩，去广州，去顺德，去很多地方。",
+        "好像只要开得够远，就远离了潼湖的烦恼。"
+      ],
+      photo: ["assets/graffiti.jpg"],
+      caption: "去很多地方"
+    },
+    {
+      date: "2026 · 06",
+      title: "端午自驾，和雨里的南昆山",
+      text: [
+        "端午，和杭州远道而来的朋友，四个人自驾去了顺德和清远。",
+        "现在几乎已经想不起来那趟具体吃了什么、玩了什么了。但一起出行的日子，总是开心的\u2014\u2014这件事我记得很清楚。",
+        "六月末的周末，我们和小明，三个人走了南昆山路线。那天一直在下雨。山路、雾、湿的树\u2014\u2014风景是另一种好看，跟晴天完全不同。烧鸡相当难忘。",
+        "旅途很短，但很开心。",
+        "这一天她的名字叫做：矫揉造作猴子精。"
+      ],
+      photo: ["assets/qingyuan.jpg"],
+      caption: "四个人，一辆车"
+    },
+    {
+      date: "2026 · 08",
+      title: "有妈妈在的小侯",
+      text: [
+        "八月，妈妈来了。",
+        "这个月的她，是\u201c幸福小侯\u201d。",
+        "先是去了罗浮山。后来一群人去了广西\u2014\u2014南宁，再到百色。",
+        "攻略是自己做的，满分。那大概是我们俩通力合作最完美的一次。",
+        "运气也好。天气好，人少，景美。",
+        "有家人在的时候，她把烦恼短暂地放下了。",
+        "不是解决了，是放下了\u2014\u2014有时候这更难，也更值得。"
+      ],
+      photo: ["assets/cave.jpg"],
+      caption: "幸福小侯"
+    },
+    {
+      date: "2026 · 09",
+      title: "漳州，古城漫步",
+      text: [
+        "还去过漳州。",
+        "古城里慢慢地走，没有行程，也没有非去不可的地方。",
+        "和她一起的日子，节奏总是很舒服的。",
+        "真好。"
+      ],
+      photo: ["assets/zhangzhou.jpg"],
+      caption: "慢慢走"
+    },
+    {
+      date: "2026 · 10",
+      title: "终于，她说出口了",
+      text: [
+        "十月，她终于提了离职。",
+        "这两个字后面，是崩溃的三个多月。一次次把心态重建起来，再一次次崩掉\u2014\u2014那种痛苦，只有在离开的时候才会停。",
+        "所以这一步，不是逃。",
+        "它是深思熟虑，也是忍无可忍；是重新开始的勇气，也是终于做出的坚定选择。",
+        "人离开舒适圈，本来就是一种勇气。哪怕那个\u201c舒适圈\u201d，其实早就一点都不舒适了。",
+        "我很高兴她迈出了这一步。但更高兴的是\u2014\u2014她终于肯承认，自己值得更好的。",
+        "接下来的路，走着瞧吧。反正她连小强都敢自己处理了。"
+      ],
+      photo: ["assets/quote.jpg"],
+      caption: "重新开始"
+    }
+  ],
+
+  // ── 尾声 ──────────────────────────────
+  finale: {
+    big: "少年心气，是不可再生之物",
+    text: [
+      "两年，这些瞬间，中间还有七百多个我没写进去的日子。",
+      "但那些日子也都在——它们变成了背景里那些没被点亮的星，安安静静地托着这几颗。"
+    ],
+
+    // ── 信件（尾声主体）──────────────────────────
+    letter: {
+      title: "致 侯丁文",
+      paras: [
+        "我真心希望你能勇敢、坚强、认真地前行。",
+        "你身上有很多很好的东西：不敷衍，认真负责，守得住边界，也稳得住平衡；时间观念强，效率高得惊人。「工作能力强」这句话，已经不足以概括你了。",
+        "这些好的东西，不要因为环境就否认，不要因为一时不被认可，就丢掉、就怀疑自己。",
+        "你无需向傻瓜证明，你有多优秀。",
+        "日子一天天在过。时间久了，真假好坏自有分辨。人生永远是一场马拉松——在路上，一直往前，做好自己，就是最好的。"
+      ],
+      names: "这两年里，你是曼大毕业生 Heidi，你是侯工，你是猴子精，你是妈宝女孩萌萌，你是爱哭爱笑爱撒娇的小绿茶，你是超级爱吃糖醋排骨的小猴子，你是 infj 绿老头。",
+      namesEnd: "但我不想用任何一种称呼来收尾。我只想写下这三个字：侯丁文。因为你就是你自己——一个不会因为在哪、遇见谁、环境如何，就轻易改变的侯丁文。",
+      questions: [
+        "以后的你，还是会因为做事不及预期而难过吗？",
+        "还是会因为想太多而焦虑吗？",
+        "还是会时常思考人生，然后觉得人生没有意义吗？",
+        "还是会陷入冬眠，需要漫长的睡眠，来拯救精疲力尽的内心世界吗？"
+      ],
+      embroidery: "assets/embroidery.jpg",   // 信件末尾那块刺绣「让你长成你」
+      embroideryCap: "给时间一点时间，让你长成你",
+      unknown: "我不知道。但我知道——人会前行，困难会一次次过去，生活会一次次归于平静，你会越发坚强、勇敢和无畏。",
+      why: "为什么？",
+      answer: "因为你的 26 岁，已经是足够棒的人啦。",
+      sign: "写在你 26 岁的秋天"
+    },
+
+    signature: "—— 一个一直在看着你的人"
+  }
+};
+
+/* 音乐焊进网页时，下面这一行会被 embed_music.py 自动替换，不用手动改 */
+const EMBEDDED_MUSIC = "";
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   以下是不需要改的程序部分
+   ═══════════════════════════════════════════════════════════════ */
+const N = () => CONFIG.friendName;
+const T = s => String(s == null ? "" : s).replace(/\{name\}/g, N());
+const $ = id => document.getElementById(id);
+
+/* ── 背景星空 ── */
+const sky = $("sky"), sctx = sky.getContext("2d");
+let SW = 0, SH = 0, DPR = 1, bgStars = [], shoot = null;
+function sizeSky(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  SW = window.innerWidth; SH = window.innerHeight;
+  sky.width = SW * DPR; sky.height = SH * DPR;
+  sctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+function makeBgStars(){
+  const n = Math.round(Math.min(170, Math.max(90, SW * SH / 5200)));
+  bgStars = Array.from({ length: n }, () => ({
+    x: Math.random() * SW, y: Math.random() * SH,
+    r: Math.random() * 1.15 + .25,
+    a: Math.random() * .55 + .18,
+    sp: Math.random() * .0085 + .002,
+    ph: Math.random() * Math.PI * 2,
+    vy: Math.random() * .022 + .006
+  }));
+}
+function drawSky(t){
+  sctx.clearRect(0, 0, SW, SH);
+  const g = sctx.createRadialGradient(SW * .5, SH * .38, 0, SW * .5, SH * .38, Math.max(SW, SH) * .85);
+  g.addColorStop(0, "#0e1832"); g.addColorStop(1, "#070b18");
+  sctx.fillStyle = g; sctx.fillRect(0, 0, SW, SH);
+
+  for (const s of bgStars){
+    s.y -= s.vy; if (s.y < -4) { s.y = SH + 4; s.x = Math.random() * SW; }
+    const tw = s.a * (0.62 + 0.38 * Math.sin(t * s.sp + s.ph));
+    sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, 6.2832);
+    sctx.fillStyle = `rgba(226,236,255,${tw})`; sctx.fill();
+  }
+  if (!shoot && Math.random() < 0.0016){
+    shoot = { x: Math.random() * SW * .8 + SW * .1, y: Math.random() * SH * .4, l: Math.random() * 90 + 60, p: 0 };
+  }
+  if (shoot){
+    shoot.p += .022;
+    const prog = shoot.p, len = shoot.l;
+    const x = shoot.x + prog * len * 3.2, y = shoot.y + prog * len * 1.5;
+    const gr = sctx.createLinearGradient(x, y, x - len * .7, y - len * .32);
+    gr.addColorStop(0, `rgba(255,240,214,${(1 - prog) * .85})`);
+    gr.addColorStop(1, "rgba(255,240,214,0)");
+    sctx.strokeStyle = gr; sctx.lineWidth = 1.4;
+    sctx.beginPath(); sctx.moveTo(x, y); sctx.lineTo(x - len * .7, y - len * .32); sctx.stroke();
+    if (prog >= 1) shoot = null;
+  }
+}
+
+/* ── 渲染内容 ── */
+function polaroidHTML(ex, i){
+  const r1 = (i % 2 ? 2.6 : -2.2) + (i * 0.7 % 1.4);
+  const r2 = (i % 2 ? -1.1 : 1.3);
+  let ph;
+  const pList = Array.isArray(ex.photo) ? ex.photo.filter(Boolean)
+              : (ex.photo ? [ex.photo] : []);
+  if (pList.length){
+    ph = pList.length > 1
+      ? `<div class="pstack">` + pList.map((src, k) =>
+          `<img class="photo s${k}" src="${src}" alt="${T(ex.title)}" loading="lazy">`
+        ).join("") + `</div>`
+      : `<img class="photo" src="${pList[0]}" alt="${T(ex.title)}" loading="lazy">`;
+  } else if (ex.noPhoto){
+    ph = `<div class="photo-ph"><div>${T(ex.noPhoto[0])}</div><em>${T(ex.noPhoto[1] || "")}</em></div>`;
+  } else {
+    ph = `<div class="photo-ph"><div>照 片 ${String(i + 1).padStart(2, "0")}</div><em>在 index.html 的 CONFIG 里替换</em></div>`;
+  }
+  return `<div class="polaroid" style="--r:${r1.toFixed(2)}deg;--r2:${r2.toFixed(2)}deg">
+      <div class="tape"></div>${ph}
+      <div class="cap">${T(ex.caption || "")}</div>
+    </div>`;
+}
+
+function render(){
+  document.title = `致 ${N()} 的两年`;
+  $("gTitle").textContent = `致 ${N()} 的两年`;
+  $("gSub").textContent = CONFIG.subtitle;
+  $("pTotal").textContent = CONFIG.exhibits.length;
+
+  $("proTitle").textContent = T(CONFIG.prologue.title);
+  $("proText").innerHTML = CONFIG.prologue.text.map(p => `<p class="story">${T(p)}</p>`).join("");
+  $("proFrame").innerHTML = polaroidHTML({
+    photo: CONFIG.prologue.photo,
+    caption: CONFIG.prologue.photoCaption,
+    noPhoto: CONFIG.prologue.noPhoto
+  }, 0);
+
+  $("hall").innerHTML = CONFIG.exhibits.map((ex, i) => `
+    <div class="exhibit" data-i="${i}">
+      <div class="dot"></div>
+      <div class="date">${T(ex.date)}</div>
+      ${polaroidHTML(ex, i)}
+      <h3>${T(ex.title)}</h3>
+      ${ex.text.map(p => `<p class="story">${T(p)}</p>`).join("")}
+    </div>`).join("");
+
+  $("finBig").textContent = T(CONFIG.finale.big);
+  renderLetter();
+  $("finText").innerHTML = CONFIG.finale.text.map(p => `<p class="story" style="text-align:center">${T(p)}</p>`).join("");
+  $("finSig").textContent = T(CONFIG.finale.signature);
+  const creList = [CONFIG.musicCredit, CONFIG.bgCredit].filter(Boolean).map(T);
+  $("credit").innerHTML = creList.join("<br>");
+  if (CONFIG.voiceSrc){ $("voiceBtn").style.display = "block"; $("voice").src = CONFIG.voiceSrc; }
+}
+
+/* ── 信件 ── */
+const HL_WORDS = ["曼大毕业生 Heidi","侯工","猴子精","妈宝女孩萌萌","爱哭爱笑爱撒娇的小绿茶",
+                  "超级爱吃糖醋排骨的小猴子","infj 绿老头"];
+function renderLetter(){
+  const L = CONFIG.finale.letter;
+  if (!L){ $("finLetter").innerHTML = ""; return; }
+
+  let names = T(L.names || "");
+  HL_WORDS.forEach(w => { names = names.split(w).join(`<em class="hl">${w}</em>`); });
+
+  let namesEnd = T(L.namesEnd || "");
+  namesEnd = namesEnd.split("侯丁文").join(`<span class="nm">侯丁文</span>`);
+
+  const qs = (L.questions || []).map((q, i) =>
+    `<p class="q" style="transition-delay:${i * 0.35}s">${T(q)}</p>`).join("");
+
+  $("finLetter").innerHTML = `
+    <div class="letter">
+      <div class="tape"></div>
+      <div class="lt">${T(L.title || "")}</div>
+      ${L.paras.map(p => `<p>${T(p)}</p>`).join("")}
+      <div class="names"><p style="margin:0">${names}</p></div>
+      <p class="namesEnd">${namesEnd}</p>
+      <div class="qs">${qs}</div>
+      <p class="unknown">${T(L.unknown || "")}</p>
+      <p class="why">${T(L.why || "")}</p>
+      <p class="answer">${T(L.answer || "")}</p>
+      ${L.embroidery ? `<figure class="lemb"><img src="${L.embroidery}" alt=""><figcaption>${T(L.embroideryCap || "")}</figcaption></figure>` : ""}
+      <div class="sign">${T(L.sign || "")}</div>
+    </div>`;
+
+  // 问句与答案随滚动逐条浮现
+  const io = new IntersectionObserver(es => {
+    for (const e of es) if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+  }, { threshold: .5, rootMargin: "0px 0px -12% 0px" });
+  document.querySelectorAll(".letter .q,.letter .answer").forEach(el => io.observe(el));
+}
+
+/* ── 入场 & 滚动点亮 ── */
+const lit = new Set();
+function setupObservers(){
+  const io = new IntersectionObserver(es => {
+    for (const e of es){
+      if (e.isIntersecting){
+        e.target.classList.add("in");
+        if (e.target.dataset.i !== undefined){
+          lit.add(e.target.dataset.i);
+          $("pCount").textContent = lit.size;
+        }
+        io.unobserve(e.target);
+      }
+    }
+  }, { threshold: .22, rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".exhibit,#prologue,#finale").forEach(el => io.observe(el));
+  // 进度条只在展厅区域显示
+  new IntersectionObserver(es => {
+    $("progress").classList.toggle("show", es[0].isIntersecting);
+  }, { threshold: 0 }).observe($("hall"));
+}
+
+/* ── 音乐 ── */
+const bgm = $("bgm"), mbtn = $("musicBtn");
+let musicOK = false;
+/* 网易云：先试着唤起 App，唤不起来就跳网页版 */
+function neteaseUrls(){
+  const m = CONFIG.music || {};
+  const id = String(m.songId || "").trim();
+  const web = (m.webUrl || "").trim() || (id ? `https://music.163.com/#/song?id=${id}` : "");
+  return { id, web, app: id ? `orpheus://song/${id}` : "" };
+}
+let appTried = false;
+function openNetease(){
+  const { app, web } = neteaseUrls();
+  if (!web && !app) return;
+  const card = document.querySelector(".mcard");
+  if (card) card.classList.add("on");
+
+  if (app && !appTried){
+    appTried = true;
+    const t0 = Date.now();
+    const go = () => {
+      // 1.2 秒内页面没被切走，说明 App 没唤起 → 退回网页版
+      if (Date.now() - t0 < 1500 && !document.hidden){ window.open(web, "_blank"); }
+    };
+    try { window.location.href = app; } catch (e) { window.open(web, "_blank"); return; }
+    setTimeout(go, 1200);
+  } else {
+    window.open(web, "_blank");
+  }
+}
+
+/* 推门页的音乐卡片 */
+function renderMusicCard(){
+  const m = CONFIG.music || {};
+  const box = $("mCard");
+  if (!box) return;
+  const hasLocal = !(CONFIG.musicSrc === "" || CONFIG.musicSrc === "embedded" || !CONFIG.musicSrc)
+                   || CONFIG.musicSrc === "embedded";
+  if (hasLocal){ box.innerHTML = ""; return; }   // 有本地音频就不显示卡片
+  const { web } = neteaseUrls();
+  if (!web){ box.innerHTML = ""; return; }
+  const cover = m.cover
+    ? `<div class="disc cov"><img src="${m.cover}" alt=""></div>`
+    : `<div class="disc">♪</div>`;
+  box.innerHTML = `
+    <div class="mcard" id="mcard">
+      ${cover}
+      <div class="meta">
+        <div class="mt">${T(m.title || "")}</div>
+        <div class="ma">${T(m.artist || "")}${m.album ? " · " + T(m.album) : ""}</div>
+      </div>
+      <div class="mb">播放</div>
+    </div>
+    <div class="mhint">${T(m.tip || "")}<br>点一下，会跳到网易云</div>`;
+  const c = $("mcard");
+  if (c) c.addEventListener("click", openNetease);
+}
+
+function setupMusic(){
+  let src = CONFIG.musicSrc;
+  if (src === "embedded") src = EMBEDDED_MUSIC;
+  if (!src){
+    // 没有本地音频：右上角按钮改成「唤起网易云」
+    const { web } = neteaseUrls();
+    if (web){ mbtn.classList.add("show"); mbtn.textContent = "♫"; }
+    else mbtn.style.display = "none";
+    return;
+  }
+  bgm.src = src; bgm.volume = 0; musicOK = true; mbtn.classList.add("show");
+}
+function startMusic(){
+  if (!musicOK) return;
+  bgm.play().then(() => {
+    mbtn.classList.add("playing"); mbtn.classList.remove("paused");
+    let v = 0; const iv = setInterval(() => { v += .04; bgm.volume = Math.min(v, .62); if (v >= .62) clearInterval(iv); }, 90);
+  }).catch(() => {});
+}
+mbtn.addEventListener("click", () => {
+  if (!musicOK){ openNetease(); return; }
+  if (bgm.paused){ startMusic(); }
+  else { bgm.pause(); mbtn.classList.remove("playing"); mbtn.classList.add("paused"); }
+});
+$("voiceBtn").addEventListener("click", () => {
+  const v = $("voice");
+  if (v.paused){ bgm.volume = .12; v.currentTime = 0; v.play(); $("voiceBtn").textContent = "❙❙ 暂停"; }
+  else { v.pause(); bgm.volume = .62; $("voiceBtn").textContent = "▶ 听我说两句"; }
+});
+$("voice").addEventListener("ended", () => { bgm.volume = .62; $("voiceBtn").textContent = "▶ 再听一次"; });
+
+/* ── 星海 ── */
+const sc = $("sc"), cctx = sc.getContext("2d");
+let seaW = 0, seaH = 0, seaReady = false, inSea = false;
+/* 星海自适应布局：不管放几个展品，星星都会自动错落铺开，不会挤在一起 */
+const fract = v => v - Math.floor(v);
+const hash  = (i, k) => fract(Math.sin(i * (12.9898 + k * 7.13) + k * 4.1) * 43758.5453);
+function seaLayout(n){
+  const cols = n <= 4 ? 2 : n <= 6 ? 3 : n <= 12 ? 4 : n <= 20 ? 5 : 6;
+  const rows = Math.ceil(n / cols);
+  const x0 = .11, x1 = .89, y0 = .16, y1 = n > 16 ? .40 : .44;
+  const cw = (x1 - x0) / cols, ch = (y1 - y0) / rows;
+  const pts = [];
+  for (let i = 0; i < n; i++){
+    const c = i % cols, r = Math.floor(i / cols);
+    let cx = x0 + c * cw + cw / 2 + (r % 2 ? cw * .5 : 0);
+    if (cx > x1) cx -= (x1 - x0);
+    pts.push([
+      cx + (hash(i, 1) - .5) * cw * .5,
+      y0 + r * ch + ch / 2 + (hash(i, 2) - .5) * ch * .5
+    ]);
+  }
+  return pts;
+}
+let seaStars = [], consStars = null, consT = 0, consLines = null, consDone = false, pulse = 0;
+const tapped = new Set();
+
+function sizeSea(){
+  const r = sc.getBoundingClientRect();
+  seaW = r.width; seaH = r.height;
+  sc.width = seaW * DPR; sc.height = seaH * DPR;
+  cctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  buildSeaStars();
+}
+let dust = [];
+function buildSeaStars(){
+  const n = CONFIG.exhibits.length;
+  const layout = seaLayout(n);
+  seaStars = layout.map((p, i) => ({
+    x: p[0] * seaW,
+    y: p[1] * seaH,
+    r: n > 16 ? 3.4 : n > 12 ? 3.9 : 4.4 + hash(i, 3) * 1.8,
+    ph: hash(i, 4) * 6.28,
+    i
+  }));
+  dust = Array.from({ length: 110 }, () => ({
+    x: Math.random() * seaW, y: seaH * (.06 + Math.random() * .82),
+    r: Math.random() * .9 + .25, a: Math.random() * .35 + .1, ph: Math.random() * 6.28
+  }));
+}
+function drawSea(t){
+  if (!inSea && !consDone) return;
+  cctx.clearRect(0, 0, seaW, seaH);
+
+  // 尘埃星（营造深度）
+  for (const d of dust){
+    const tw = .5 + .5 * Math.sin(t * .0016 + d.ph);
+    cctx.beginPath(); cctx.arc(d.x, d.y + Math.sin(t * .0009 + d.ph) * 4, d.r, 0, 6.2832);
+    cctx.fillStyle = `rgba(200,214,246,${d.a * tw})`; cctx.fill();
+  }
+
+  // 星座（成型中 / 已成型）
+  if (consStars){
+    const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    const e = ease(Math.min(consT, 1));
+    cctx.save();
+    if (consT > .82 && consLines){
+      const la = Math.min((consT - .82) / .5, 1) * .17;
+      cctx.strokeStyle = `rgba(242,193,122,${la})`; cctx.lineWidth = .7;
+      for (const [a, b] of consLines){
+        cctx.beginPath(); cctx.moveTo(a.x, a.y); cctx.lineTo(b.x, b.y); cctx.stroke();
+      }
+    }
+    for (const s of consStars){
+      const x = s.sx + (s.tx - s.sx) * e, y = s.sy + (s.ty - s.sy) * e;
+      const tw = .55 + .45 * Math.sin(t * .0022 + s.ph);
+      const a = Math.min(consT / .35, 1) * tw * s.a;
+      cctx.beginPath(); cctx.arc(x, y, s.r, 0, 6.2832);
+      cctx.fillStyle = `rgba(255,220,166,${a})`; cctx.fill();
+      if (s.big){
+        const gg = cctx.createRadialGradient(x, y, 0, x, y, 16);
+        gg.addColorStop(0, `rgba(242,193,122,${a * .5})`); gg.addColorStop(1, "rgba(242,193,122,0)");
+        cctx.fillStyle = gg; cctx.beginPath(); cctx.arc(x, y, 16, 0, 6.2832); cctx.fill();
+      }
+    }
+    cctx.restore();
+  }
+
+  // 八颗记忆星
+  const fade = consDone ? 1 : 1;
+  for (const s of seaStars){
+    const tw = .6 + .4 * Math.sin(t * .0019 + s.ph);
+    const isTap = tapped.has(s.i);
+    const fy = Math.sin(t * .0007 + s.ph) * 5;
+    const rr = s.r + (isTap ? 1.8 : 0) + Math.sin(t * .0014 + s.ph) * .6;
+    const sy = s.y + fy;
+    cctx.save();
+    const g = cctx.createRadialGradient(s.x, sy, 0, s.x, sy, rr * 6);
+    g.addColorStop(0, `rgba(242,193,122,${(isTap ? .6 : .34) * tw})`);
+    g.addColorStop(1, "rgba(242,193,122,0)");
+    cctx.fillStyle = g; cctx.beginPath(); cctx.arc(s.x, sy, rr * 6, 0, 6.2832); cctx.fill();
+    cctx.beginPath(); cctx.arc(s.x, sy, rr, 0, 6.2832);
+    cctx.fillStyle = `rgba(255,226,180,${(isTap ? 1 : .8) * tw})`; cctx.fill();
+    if (isTap){
+      cctx.beginPath(); cctx.arc(s.x, sy, rr + 8 + Math.sin(t * .0016 + s.ph) * 2, 0, 6.2832);
+      cctx.strokeStyle = `rgba(242,193,122,${.3 * tw})`; cctx.lineWidth = 1; cctx.stroke();
+    }
+    // 日期标签（展品多的时候只标已点亮的，免得文字糊成一团）
+    const showLabel = seaStars.length <= 12 || isTap;
+    if (showLabel){
+      cctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+      cctx.textAlign = "center";
+      cctx.fillStyle = `rgba(160,174,206,${isTap ? .95 : .62})`;
+      cctx.fillText(T(CONFIG.exhibits[s.i].date), s.x, sy + rr + 17);
+    }
+    cctx.restore();
+  }
+}
+
+/* 点星 */
+sc.addEventListener("click", e => {
+  const r = sc.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  let best = null, bd = 30;
+  for (const s of seaStars){
+    const d = Math.hypot(s.x - x, s.y - y);
+    if (d < bd){ bd = d; best = s; }
+  }
+  if (!best) return;
+  if (best){ tapped.add(best.i); openCard(best.i); }
+});
+
+/* 卡片 */
+const card = $("card");
+function openCard(i){
+  const ex = CONFIG.exhibits[i];
+  $("cardDate").textContent = T(ex.date);
+  $("cardTitle").textContent = T(ex.title);
+  const ph = $("cardPhoto");
+  if (ex.photo){ ph.style.display = "block"; ph.src = ex.photo; }
+  else { ph.style.display = "none"; }
+  $("cardText").innerHTML = ex.text.map(p => `<p style="margin:0 0 12px">${T(p)}</p>`).join("");
+  card.classList.add("show");
+}
+$("cardClose").addEventListener("click", () => card.classList.remove("show"));
+card.addEventListener("click", e => { if (e.target === card) card.classList.remove("show"); });
+
+/* 文字点阵 → 星座目标点 */
+function sampleText(text, want){
+  const S = 260;
+  const cv = document.createElement("canvas"); cv.width = S; cv.height = S;
+  const cx = cv.getContext("2d");
+  cx.fillStyle = "#fff"; cx.textAlign = "center"; cx.textBaseline = "middle";
+  const fs = text.length <= 1 ? S * .78 : text.length === 2 ? S * .58 : S * .44;
+  cx.font = `600 ${fs}px "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif`;
+  cx.fillText(text, S / 2, S / 2 + fs * .02);
+  const d = cx.getImageData(0, 0, S, S).data;
+  const pts = [];
+  for (let py = 0; py < S; py += 5){
+    for (let px = 0; px < S; px += 5){
+      if (d[(py * S + px) * 4 + 3] > 130) pts.push([px / S, py / S]);
+    }
+  }
+  // 打散后均匀抽取
+  for (let i = pts.length - 1; i > 0; i--){ const j = (Math.random() * (i + 1)) | 0; [pts[i], pts[j]] = [pts[j], pts[i]]; }
+  return pts.slice(0, want);
+}
+
+/* 天秤座天平：归一化坐标（y 向下），以及亮星之间的连线 */
+const LIBRA_NODES = [
+  //   x     y    亮星?
+  [0.500, 0.04, 1],   // β 氐宿四（最亮，天平顶端）
+  [0.255, 0.31, 1],   // σ
+  [0.745, 0.31, 1],   // α 氐宿一
+  [0.150, 0.62, 0],   // δ
+  [0.850, 0.64, 0],   // γ
+  [0.275, 0.92, 1],   // υ（左秤盘）
+  [0.725, 0.93, 1]    // τ（右秤盘）
+];
+const LIBRA_LINKS = [[0,1],[0,2],[1,3],[2,4],[3,5],[4,6]];
+
+function buildConstellation(){
+  const shape = CONFIG.constellationShape || "text";
+  let mapped = [], links = [], bigSet = new Set();
+
+  if (shape === "libra"){
+    // ── 天秤座天平 ──
+    const boxW = seaW * .60, boxH = Math.min(seaH * .30, 220);
+    const ox = (seaW - boxW) / 2, oy = seaH * (CONFIG.exhibits.length > 16 ? .46 : .47);
+    const nodePts = LIBRA_NODES.map(([px, py]) => ({ x: ox + px * boxW, y: oy + py * boxH }));
+
+    // 沿每条连线撒星（线段上均匀取点 + 轻微抖动）
+    const PER = 26;
+    LIBRA_LINKS.forEach(([a, b]) => {
+      const A = nodePts[a], B = nodePts[b];
+      for (let k = 0; k <= PER; k++){
+        const t = k / PER;
+        const jx = (Math.random() - .5) * 3.2, jy = (Math.random() - .5) * 3.2;
+        mapped.push({ x: A.x + (B.x - A.x) * t + jx, y: A.y + (B.y - A.y) * t + jy });
+      }
+    });
+    // 亮星位置额外堆一小簇，做成「节点发光」的效果
+    nodePts.forEach((p, i) => {
+      if (!LIBRA_NODES[i][2]) return;
+      for (let k = 0; k < 26; k++){
+        const ang = Math.random() * 6.28, rad = Math.random() * 9;
+        mapped.push({ x: p.x + Math.cos(ang) * rad, y: p.y + Math.sin(ang) * rad });
+      }
+    });
+    links = LIBRA_LINKS.map(([a, b]) => [nodePts[a], nodePts[b]]);
+    // 亮星画大一点
+    const bigIdx = new Set();
+    LIBRA_LINKS.forEach(([a, b]) => { bigIdx.add(mapped.length); });
+  } else {
+    // ── 文字点阵（原来的模式）──
+    const text = CONFIG.constellation || N();
+    const boxW = seaW * .74, boxH = Math.min(seaH * .26, 190);
+    const ox = (seaW - boxW) / 2, oy = seaH * (CONFIG.exhibits.length > 16 ? .46 : .49);
+    const pts = sampleText(text, 300);
+    if (!pts.length) return;
+    mapped = pts.map(([px, py]) => ({ x: ox + px * boxW, y: oy + py * boxH }));
+    const step = 3;
+    for (let i = 0; i < mapped.length; i += step){
+      for (let j = i + step; j < mapped.length; j += step){
+        const d = Math.hypot(mapped[i].x - mapped[j].x, mapped[i].y - mapped[j].y);
+        if (d < boxH * .17) links.push([mapped[i], mapped[j]]);
+      }
+    }
+    bigSet = new Set(); for (let i = 0; i < mapped.length; i += 17) bigSet.add(i);
+  }
+
+  consStars = mapped.map((p, i) => {
+    const ang = Math.random() * 6.28, dist = Math.max(seaW, seaH) * (.5 + Math.random() * .5);
+    const near = shape === "libra"
+      ? LIBRA_NODES.some(([nx, ny, isBig]) => {
+          if (!isBig) return false;
+          return Math.random() < .5 && i % 31 === 0;
+        })
+      : false;
+    return {
+      sx: seaW / 2 + Math.cos(ang) * dist, sy: seaH / 2 + Math.sin(ang) * dist * .7,
+      tx: p.x, ty: p.y,
+      r: (shape === "libra" ? (i % 23 === 0 ? 2.4 : 1.05 + Math.random() * .5)
+                            : (bigSet.has(i) ? 2.2 : 1.15 + Math.random() * .5)),
+      big: shape === "libra" ? i % 23 === 0 : bigSet.has(i),
+      a: .55 + Math.random() * .45,
+      ph: Math.random() * 6.28
+    };
+  });
+  consLines = links;
+  consT = 0;
+}
+
+$("linkBtn").addEventListener("click", () => {
+  if (consStars) return;
+  buildConstellation();
+  $("linkBtn").classList.add("done");
+  $("seahint").style.opacity = 0;
+  const t0 = performance.now();
+  (function step(now){
+    consT = Math.min((now - t0) / 3000, 1.4);
+    if (consT < 1.4) requestAnimationFrame(step);
+    else { consDone = true; setTimeout(() => $("finale").scrollIntoView({ behavior: "smooth" }), 900); }
+  })(t0);
+});
+
+/* ── 写给两年后的自己 ── */
+const LS = "wish_" + (CONFIG.friendName || "friend");
+$("wish").value = localStorage.getItem(LS) || "";
+$("saveWish").addEventListener("click", () => {
+  localStorage.setItem(LS, $("wish").value);
+  const tp = $("savedTip");
+  tp.textContent = "✓ 已经收好了，下次打开还在。";
+  setTimeout(() => tp.textContent = "", 3200);
+});
+
+/* ── 离线保存：把照片、音乐全部转成内嵌数据，存成一个文件 ── */
+async function toDataURL(url){
+  if (!url || url.startsWith("data:")) return url;
+  try{
+    const r = await fetch(url, { mode: "cors" });
+    const b = await r.blob();
+    return await new Promise(res => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = () => res(url);
+      fr.readAsDataURL(b);
+    });
+  }catch(e){ return url; }
+}
+
+$("keepBtn").addEventListener("click", async () => {
+  const btn = $("keepBtn"), tip = $("keepTip");
+  btn.disabled = true; btn.textContent = "正在打包…"; tip.textContent = "照片和音乐正在装进去，稍等几秒。";
+
+  // 收集 CONFIG 里用到的所有外部文件
+  const urls = new Set();
+  const addP = v => { if (!v) return; (Array.isArray(v) ? v : [v]).forEach(u => u && urls.add(u)); };
+  addP(CONFIG.prologue.photo);
+  CONFIG.exhibits.forEach(e => addP(e.photo));
+  addP(CONFIG.voiceSrc);
+  if (CONFIG.bgPhotos){ addP(CONFIG.bgPhotos.gate); addP(CONFIG.bgPhotos.finale); }
+  if (CONFIG.music && CONFIG.music.cover) addP(CONFIG.music.cover);
+  const L = CONFIG.finale && CONFIG.finale.letter;
+  if (L) addP(L.embroidery);
+  const mSrc = (CONFIG.musicSrc === "embedded") ? EMBEDDED_MUSIC : CONFIG.musicSrc;
+  if (mSrc) urls.add(mSrc);
+
+  const list = [...urls].filter(u => u && !u.startsWith("data:"));
+  const map = new Map();
+  await Promise.all(list.map(async u => map.set(u, await toDataURL(u))));
+
+  const clone = document.documentElement.cloneNode(true);
+
+  // ① 把脚本里的路径也换掉（否则重新渲染时又会去找外部文件）
+  clone.querySelectorAll("script").forEach(sc => {
+    let t = sc.textContent;
+    map.forEach((d, u) => { t = t.split('"' + u + '"').join('"' + d + '"'); });
+    sc.textContent = t;
+  });
+  // ② 页面上已经渲染出来的 img / audio 也换掉
+  clone.querySelectorAll("img[src]").forEach(el => {
+    const u = el.getAttribute("src");
+    if (u && map.has(u)) el.setAttribute("src", map.get(u));
+  });
+  ["bgm", "voice"].forEach(id => {
+    const el = clone.querySelector("#" + id);
+    if (!el) return;
+    const u = el.getAttribute("src") || ($(id) || {}).src || "";
+    if (map.has(u)) el.setAttribute("src", map.get(u));
+    else if (id === "bgm" && map.has(mSrc)) el.setAttribute("src", map.get(mSrc));
+  });
+
+  // 复位成「第一次打开」的状态，让她存下来的是完整体验
+  const g = clone.querySelector("#gate");
+  if (g) g.removeAttribute("style");
+  clone.querySelectorAll(".in").forEach(el => el.classList.remove("in"));
+  clone.querySelectorAll("img[loading]").forEach(el => el.removeAttribute("loading"));
+  const mb = clone.querySelector("#musicBtn"); if (mb) mb.className = "show";
+  const lb = clone.querySelector("#linkBtn"); if (lb) lb.className = "";
+  const cb = clone.querySelector("#card"); if (cb) cb.className = "";
+  const w = clone.querySelector("#wish");
+  if (w) w.textContent = $("wish").value;   // 把她写下的话也带进去
+
+  const html = "<!DOCTYPE html>\n" + clone.outerHTML;
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `致${N()}的两年.html`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+
+  btn.textContent = "已经存好了";
+  const mb2 = (blob.size / 1024 / 1024).toFixed(1);
+  tip.textContent = `共 ${mb2} MB，在「下载」文件夹里。以后不联网、不用这个链接，双击也能打开。`;
+});
+
+/* ── NASA 背景星空 ── */
+function setupBgPhotos(){
+  const cfg = CONFIG.bgPhotos || {};
+  const box = $("bgPhoto");
+  if (!box) return;
+  const items = [];
+  if (cfg.gate)   items.push({ src: cfg.gate,   el: "gate",   target: $("gate") });
+  if (cfg.finale) items.push({ src: cfg.finale, el: "finale", target: $("finale") });
+  if (!items.length){ box.style.display = "none"; return; }
+
+  box.innerHTML = items.map((it, i) =>
+    `<img class="bgi" data-i="${i}" src="${it.src}" alt="">`).join("");
+  const imgs = [...box.querySelectorAll(".bgi")];
+
+  // 哪个区块进入视野，就淡入对应的那张
+  const show = i => imgs.forEach((im, k) => im.classList.toggle("on", k === i));
+  const io = new IntersectionObserver(es => {
+    for (const e of es){ if (e.isIntersecting){ show(+e.target.dataset.i); break; } }
+  }, { threshold: .35 });
+  items.forEach((it, i) => { if (it.target){ it.target.dataset.i = i; io.observe(it.target); } });
+
+  // 兜底：滚动到尾声时也切一次
+  window.addEventListener("scroll", () => {
+    const y = window.scrollY, H = document.body.scrollHeight;
+    if (y > H * .82) show(imgs.length - 1);
+    else if (y < H * .12) show(0);
+  }, { passive: true });
+
+  show(0);
+}
+
+/* ── 启动 ── */
+render();
+renderMusicCard();
+setupBgPhotos();
+setupMusic();
+if ($("enterSub")){
+  const hasCard = !!document.querySelector(".mcard");
+  $("enterSub").textContent = hasCard ? "先放首歌，再推门" : "建议戴上耳机";
+}
+setupObservers();
+sizeSky(); makeBgStars();
+sizeSea();
+
+new IntersectionObserver(es => { inSea = es[0].isIntersecting; }, { threshold: .15 }).observe($("starsea"));
+new IntersectionObserver(es => {
+  const b = $("linkBtn");
+  if (es[0].isIntersecting && !consStars) b.classList.add("show");
+}, { threshold: .35 }).observe($("starsea"));
+
+let raf;
+(function loop(t){ drawSky(t); drawSea(t); raf = requestAnimationFrame(loop); })(0);
+
+window.addEventListener("resize", () => {
+  sizeSky(); makeBgStars(); sizeSea();
+  if (consDone && consStars) buildConstellation(), consT = 1.4, consDone = true;
+});
+
+$("enter").addEventListener("click", () => {
+  startMusic();
+  $("gate").style.transition = "opacity 1s, transform 1s";
+  $("gate").style.opacity = 0; $("gate").style.transform = "translateY(-24px)";
+  setTimeout(() => { $("gate").style.display = "none"; window.scrollTo({ top: 0, behavior: "smooth" }); }, 1000);
+});
+</script>
+</body>
+</html>
